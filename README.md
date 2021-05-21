@@ -4,17 +4,17 @@ This repo contains a shiny app to create a pre-formatted `yml` file containing P
 
 To run this you will need to open the file `create_yml.R` with [RStudio](https://www.rstudio.com/) and search for the *Run App* button:
 
-![](run_app.svg)
+![](img/run_app.svg)
 
 After this, a window should pop up that allows you to load an existing `yml` file or to create a new one from scratch.
 
 Creating a new File from scratch
 
-![](new_yml.png)
+![](img/new_yml.png)
 
 Loading an existing file (eg. the provided demo `starwars.yml`)
 
-![](load_yml.png)
+![](img/load_yml.png)
 
 The created/modified `yml` file can be save using the *Download* button within the *modify* tab.
 
