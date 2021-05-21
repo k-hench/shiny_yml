@@ -1,16 +1,16 @@
 # Project Metadata: starwars
 project_name: starwars
-person_1:
+person_01:
   name: Lea
   institute: resistance
   email: her_majesty@resistance.org
   role: PI
   date: 2021-05-21 - 2021-05-21
-person_2:
+person_02:
   name: Luke
   institute: jedi
   email: luke@force.com
-  role: collaborator
+  role: Collaborator
   date: 2021-05-21 - 2021-05-21
 location_1:
   country: death star
