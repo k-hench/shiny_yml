@@ -1,0 +1,35 @@
+# Project Metadata: starwars
+project_name: starwars
+person_1:
+  name: Lea
+  institute: resistance
+  email: her_majesty@resistance.org
+  role: PI
+  date: 2021-05-21 - 2021-05-21
+person_2:
+  name: Luke
+  institute: jedi
+  email: luke@force.com
+  role: collaborator
+  date: 2021-05-21 - 2021-05-21
+location_1:
+  country: death star
+  region: outer galaxy
+  park: park A
+  field_station: x475
+  lat_log: 54.43 N; 120.53 E
+data_file_type_overview:
+  file_type_1: tsv
+  file_type_2: txt
+  file_type_3: csv
+  file_type_4: mp3
+data_description:
+  data_desc_1: x_file
+  data_desc_2: y_file
+  data_desc_3: z_file
+dates:
+  start_time: '2021-05-17'
+  end_time: '2021-05-21'
+funding_sources:
+  fund_1: the free people
+  fund_2: everyone else

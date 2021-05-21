@@ -1,0 +1,24 @@
+{
+    "id": "CA784BBD",
+    "path": "~/work/software/Rstuff/create_project_yml/create_yml.R",
+    "project_path": "create_yml.R",
+    "type": "r_source",
+    "hash": "3503166389",
+    "contents": "",
+    "dirty": false,
+    "created": 1621523342641.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "cursorPosition": "8,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1621602102,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1621602102907,
+    "read_only": false,
+    "read_only_alternatives": []
+}
