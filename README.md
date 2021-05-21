@@ -6,7 +6,7 @@ To run this you will need to open the file `create_yml.R` with [RStudio](https:/
 
 ![](run_app.svg)
 
-After this a window should pop up that allows you to load an existing `yml` file or to create anew one from scratch.
+After this, a window should pop up that allows you to load an existing `yml` file or to create a new one from scratch.
 
 Creating a new File from scratch
 
