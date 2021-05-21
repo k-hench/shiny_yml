@@ -101,7 +101,8 @@ new_date <- function(date_id, date_date){
         yaml_obj$dates <- list()
     }
     
-    yaml_obj$dates <- c(yaml_obj$dates, new_id = date_date)
+    # yaml_obj$dates <- c(yaml_obj$dates, new_id = date_date)
+    yaml_obj$dates <- c(yaml_obj$dates, new_id = str_c(date_date, collapse = " - "))
     
     names(yaml_obj$dates)[names(yaml_obj$dates) == "new_id"] <- date_id
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
@@ -181,18 +182,47 @@ ui <- fluidPage(
                 ),
                 conditionalPanel(
                     condition = "input.next_field == 'data_file_type_overview'",
-                    textInput("data_type", "Data Type", value = "", width = NULL, placeholder = NULL),
+                    selectizeInput(inputId = "data_type", 
+                                   label =  "Data Type (select or free text)",
+                                   options = list(create = TRUE),
+                                   choices = c("csv", "gpgk", "gpx", "json", 
+                                               "md", "mp3", "mp4", "pdf", "py",
+                                               "R", "Rmd", "shp", "tex", "tiff",
+                                               "tsv", "txt", "yaml/yml")
+                                   ),
                     actionButton("add_type", "Add Field")
                 ),
                 conditionalPanel(
                     condition = "input.next_field == 'data_description'",
-                    textInput("data_desc", "Data description", value = "", width = NULL, placeholder = NULL),
+                    # textInput("data_desc", "Data description", value = "", width = NULL, placeholder = NULL),
+                    selectizeInput(inputId = "data_desc", 
+                                   label =  "Data description (select or free text)",
+                                   options = list(create = TRUE),
+                                   choices = c("Behavioral (focal follows, scans, etc., annotations)",
+                                               "Movement (gps collar, telemetry data, accelerometer)",
+                                               "Vocalizations",
+                                               "Ecological (i.e. species, plant surveys, soil samples)",
+                                               "Climatic",
+                                               "Camera Trap",
+                                               "Spatial (i.e. GPS)",
+                                               "Drone Imagery",
+                                               "DNA Samples",
+                                               "Tissue Samples")
+                    ),
                     actionButton("add_desc", "Add Field")
                 ),
                 conditionalPanel(
                     condition = "input.next_field == 'dates'",
-                    textInput("date_id", "Date Specifier", value = "", width = NULL, placeholder = NULL),
-                    dateInput(inputId = "date_date",label = "Date"),
+                    # textInput("date_id", "Date Specifier", value = "", width = NULL, placeholder = NULL),
+                    selectizeInput(inputId = "date_id", 
+                                   label =  "Date Specifier (select or free text)",
+                                   options = list(create = TRUE),
+                                   choices = c("Field Trip",
+                                               "Data Collection",
+                                               "Project Duration")
+                    ),
+                    # dateInput(inputId = "date_date", label = "Date"),
+                    dateRangeInput(inputId = "date_date", label = "Date"),
                     actionButton("add_date", "Add Field")
                 ),
                 conditionalPanel(
