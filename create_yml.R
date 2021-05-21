@@ -11,6 +11,8 @@ library(shiny)
 library(tidyverse)
 library(yaml)
 
+
+# define functions --------------
 print_yaml <- function(){yaml_obj[names(yaml_obj) %>% order_names()]}
 
 update_name <- function(name){yaml_obj$`project_name` <- name; yaml_obj[names(yaml_obj) %>% order_names()]}
@@ -48,11 +50,14 @@ new_species <- function(name_eng, name_loc, name_sci){
 
 new_location <- function(country, region, park, field_station, lat_log){
     new_id <- str_c("location_", sum(str_count(names(yaml_obj),"location_")) + 1)
-    yaml_obj[[new_id]] <- list(country = country,
-                               region = region,
-                               park = park,
-                               field_station = field_station,
-                               lat_log = lat_log)
+    
+    list_loc <- list(country = country,
+                     region = region,
+                     park = park,
+                     field_station = field_station,
+                     lat_log = lat_log)
+    
+    yaml_obj[[new_id]] <- list_loc[sapply(list_loc, function(x){ x != "" })]
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
@@ -82,7 +87,6 @@ new_data_desc <- function(data_desc){
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
-
 new_fund <- function(fund_id){
     if( sum(str_count(names(yaml_obj),"funding_sources")) == 0 ){ 
         yaml_obj$funding_sources <- list()
@@ -108,9 +112,16 @@ new_date <- function(date_id, date_date){
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
+add_custom_field <- function(custom_name, custom_content){
+    cat(str_c(custom_name, ": ", custom_content, "\\n"))
+}
+
+
+# define objects --------------
 yaml_obj <- list( project_name = "")
 proj_name <- ''
-# Define UI for application that draws a histogram
+
+# define UI for application (the user input panel) ------------
 ui <- fluidPage(
     
     # App title ----
@@ -121,11 +132,12 @@ ui <- fluidPage(
         sidebarPanel(
             selectInput("new_project", "Project",
                         c(load = "load",
-                          modify = "modify"
+                          modify = "modify",
+                          add_custom_entry = "add_custom_entry"
                         )),
             conditionalPanel(
                 condition = "input.new_project == 'load'",
-                fileInput("load_file", "Open Yaml", multiple = FALSE, width = NULL),),
+                fileInput("load_file", "Open Yaml", multiple = FALSE, width = NULL)),
             conditionalPanel(
                 condition = "input.new_project == 'modify'",
                 selectInput("next_field", "Next Field",
@@ -163,8 +175,8 @@ ui <- fluidPage(
                 conditionalPanel(
                     condition = "input.next_field == 'location'",
                     textInput("loc_country", "Country", value = "", width = NULL, placeholder = NULL),
-                    textInput("loc_region", "Region", value = "", width = NULL, placeholder = NULL),
-                    textInput("loc_park", "Park", value = "", width = NULL, placeholder = NULL),
+                    textInput("loc_region", "State/Province/Region", value = "", width = NULL, placeholder = NULL),
+                    textInput("loc_park", "Field Station", value = "", width = NULL, placeholder = NULL),
                     textInput("loc_field_station", "Field Station", value = "", width = NULL, placeholder = NULL),
                     numericInput("loc_long",
                                  "Long",
@@ -233,7 +245,13 @@ ui <- fluidPage(
                # Button
                 downloadButton("downloadData", "Download")
                 
-            )),
+            ),
+            conditionalPanel(
+                condition = "input.new_project == 'add_custom_entry'",
+                selectInput("custom_select", "Select Field",choices = names(yaml_obj),width = NULL),
+                textInput("custom_name", "Field name", value = "", width = NULL, placeholder = NULL),
+                textInput("custom_content", "Field name", value = "", width = NULL, placeholder = NULL))
+            ),
         
         # Main panel for displaying outputs ----
         mainPanel(
@@ -243,8 +261,8 @@ ui <- fluidPage(
         
     ))
 
-# Define server logic required to draw a histogram
-server <- function(input, output) {
+# define server logic (actually calling the yaml update functions) ------------
+server <- function(input, output, session) {
     
     # Downloadable csv of selected dataset ----
     output$downloadData <- downloadHandler(
@@ -360,11 +378,28 @@ server <- function(input, output) {
                                       str_replace_all(" ", "&nbsp"))
     })
     
+    observeEvent(yaml_obj,{
+        updateSelectInput(session, "custom_select",
+                      label = paste("Select input label", names(yaml_obj)),
+                      choices = names(yaml_obj),
+                      selected = NULL
+    )})
+    
+    observeEvent(input$custom_content, {
+        add_custom_field(custom_name = input$custom_name, custom_content = input$custom_content)
+        
+        output$yaml <- renderText(str_replace_all(string = as.yaml(print_yaml(),
+                                                                   indent = 6),
+                                                  pattern = "\\n", replacement = "<br>") %>% 
+                                      str_replace_all(" ", "&nbsp"))
+    })
+    
     # output$yaml <- renderText(as.yaml(list(foo = list(bar = 'baz')), indent = 3))
     output$yaml <- renderText(str_replace_all(string = as.yaml(print_yaml(),
                                                                indent = 6),
                                               pattern = "\\n", replacement = "<br>") %>% 
                                   str_replace_all(" ", "&nbsp"))
 }
+
 # Run the application 
 shinyApp(ui = ui, server = server)
