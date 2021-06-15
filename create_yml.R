@@ -15,7 +15,17 @@ library(yaml)
 # define functions --------------
 print_yaml <- function(){yaml_obj[names(yaml_obj) %>% order_names()]}
 
-update_name <- function(name){yaml_obj$`project_name` <- name; yaml_obj[names(yaml_obj) %>% order_names()]}
+update_name <- function(name){yaml_obj$`project_name` <<- name; yaml_obj[names(yaml_obj) %>% order_names()]}
+
+export_yml <- function(name){ 
+    if(is.null(yaml_obj$modified_at)){
+        yaml_obj$modified_at_utc <<- list(lubridate::as_datetime(Sys.time(), tz = "UTC") %>% as.character())
+    } else {
+        yaml_obj$modified_at_utc <<- c(yaml_obj$modified_at_utc,
+                                   lubridate::as_datetime(Sys.time(), tz = "UTC") %>% as.character())
+    }
+    update_name(name) 
+    }
 
 order_names <- function(nm){nm %>%
         str_replace_all(pattern = "project_name", "01_project_name") %>%
@@ -31,7 +41,7 @@ order_names <- function(nm){nm %>%
 
 new_person <- function(name, inst, email, role, date){
     new_id <- str_c("person_", (sum(str_count(names(yaml_obj), "person_")) + 1) %>%
-                        str_pad(width = 2,pad = 0))
+                        str_pad(width = 2, pad = 0))
     yaml_obj[[new_id]] <- list(name = name,
                                institute = inst,
                                email = email,
@@ -283,7 +293,7 @@ server <- function(input, output, session) {
         content = function(file) {
             tmp_file <- tempfile()
             write_lines(x = str_c("# Project Metadata: ", input$proj_lab), file = file)
-            write_yaml(x = update_name(input$proj_lab), file = tmp_file)
+            write_yaml(x = export_yml(input$proj_lab), file = tmp_file)
             write_lines(read_lines(tmp_file), file = file, append = TRUE)
             unlink(tmp_file)
         }
