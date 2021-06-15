@@ -125,8 +125,7 @@ new_date <- function(date_id, date_date){
 add_custom_field <- function(custom_name, custom_content){
     cat(str_c(custom_name, ": ", custom_content, "\\n"))
     
-    if(custom_name %in% names(yaml_obj) &
-       grepl(pattern = ": ", custom_content)){
+    if(grepl(pattern = ": ", custom_content)){
         sub_name <- str_remove_all(custom_content, pattern = ": .*$")
         new_content <- str_remove_all(custom_content, pattern = "^.*: ")
         yaml_obj[[custom_name]][[sub_name]] <- new_content
