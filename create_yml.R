@@ -260,7 +260,7 @@ ui <- fluidPage(
             conditionalPanel(
                 condition = "input.new_project == 'add_custom_entry'",
                 textInput("custom_name", "Field name", value = "", width = NULL, placeholder = NULL),
-                textInput("custom_content", "Field name", value = "", width = NULL, placeholder = NULL),
+                textInput("custom_content", "Custom Content", value = "", width = NULL, placeholder = NULL),
                 actionButton("add_custom", "Add Field"))
             ),
         
