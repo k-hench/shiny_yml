@@ -114,6 +114,17 @@ new_date <- function(date_id, date_date){
 
 add_custom_field <- function(custom_name, custom_content){
     cat(str_c(custom_name, ": ", custom_content, "\\n"))
+    
+    if(custom_name %in% names(yaml_obj) &
+       grepl(pattern = ": ", custom_content)){
+        sub_name <- str_remove_all(custom_content, pattern = ": .*$")
+        new_content <- str_remove_all(custom_content, pattern = "^.*: ")
+        yaml_obj[[custom_name]][[sub_name]] <- new_content
+    } else {
+        yaml_obj[[str_replace_all(custom_name, " ", "_")]] <- custom_content
+    }
+    
+    yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
 
@@ -248,9 +259,9 @@ ui <- fluidPage(
             ),
             conditionalPanel(
                 condition = "input.new_project == 'add_custom_entry'",
-                selectInput("custom_select", "Select Field",choices = names(yaml_obj),width = NULL),
                 textInput("custom_name", "Field name", value = "", width = NULL, placeholder = NULL),
-                textInput("custom_content", "Field name", value = "", width = NULL, placeholder = NULL))
+                textInput("custom_content", "Field name", value = "", width = NULL, placeholder = NULL),
+                actionButton("add_custom", "Add Field"))
             ),
         
         # Main panel for displaying outputs ----
@@ -385,7 +396,7 @@ server <- function(input, output, session) {
                       selected = NULL
     )})
     
-    observeEvent(input$custom_content, {
+    observeEvent(input$add_custom, {
         add_custom_field(custom_name = input$custom_name, custom_content = input$custom_content)
         
         output$yaml <- renderText(str_replace_all(string = as.yaml(print_yaml(),
