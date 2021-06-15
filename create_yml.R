@@ -161,7 +161,7 @@ ui <- fluidPage(
                     textInput("person_name", "Person Name", value = "", width = NULL, placeholder = NULL),
                     textInput("person_institution", "Institution", value = "", width = NULL, placeholder = NULL),
                     textInput("person_email", "Email", value = "", width = NULL, placeholder = NULL),
-                    selectInput("person_role", "Role", c("PI", "Collaborator", "HIWI", "Field Assistant", "Lab Assistant", "Analyst")),
+                    selectInput("person_role", "Role", c("PI", "PhD Student", "Masters Student", "Collaborator", "HIWI", "Field Assistant", "Lab Assistant", "Analyst")),
                     dateRangeInput("person_date", "Field Date"),
                     actionButton("add_person", "Add Field")
                 ),
@@ -176,7 +176,7 @@ ui <- fluidPage(
                     condition = "input.next_field == 'location'",
                     textInput("loc_country", "Country", value = "", width = NULL, placeholder = NULL),
                     textInput("loc_region", "State/Province/Region", value = "", width = NULL, placeholder = NULL),
-                    textInput("loc_park", "Field Station", value = "", width = NULL, placeholder = NULL),
+                    textInput("loc_park", "Park/Protected Area", value = "", width = NULL, placeholder = NULL),
                     textInput("loc_field_station", "Field Station", value = "", width = NULL, placeholder = NULL),
                     numericInput("loc_long",
                                  "Long",
@@ -200,7 +200,7 @@ ui <- fluidPage(
                                    choices = c("csv", "gpgk", "gpx", "json", 
                                                "md", "mp3", "mp4", "pdf", "py",
                                                "R", "Rmd", "shp", "tex", "tiff",
-                                               "tsv", "txt", "yaml/yml")
+                                               "tsv", "txt", "yaml/yml","jpg","paper")
                                    ),
                     actionButton("add_type", "Add Field")
                 ),
