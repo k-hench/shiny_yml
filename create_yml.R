@@ -39,14 +39,15 @@ order_names <- function(nm){nm %>%
         order()
     }
 
-new_person <- function(name, inst, email, role, date){
+new_person <- function(name, inst, email, role, uploader){
     new_id <- str_c("person_", (sum(str_count(names(yaml_obj), "person_")) + 1) %>%
                         str_pad(width = 2, pad = 0))
     yaml_obj[[new_id]] <- list(name = name,
                                institute = inst,
                                email = email,
                                role = role,
-                               date = str_c(date, collapse = " - "))
+                               uploader = uploader )
+                               #date = str_c(date, collapse = " - "))
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
@@ -182,7 +183,8 @@ ui <- fluidPage(
                     textInput("person_institution", "Institution", value = "", width = NULL, placeholder = NULL),
                     textInput("person_email", "Email", value = "", width = NULL, placeholder = NULL),
                     selectInput("person_role", "Role", c("PI", "PhD Student", "Masters Student", "Collaborator", "HIWI", "Field Assistant", "Lab Assistant", "Analyst")),
-                    dateRangeInput("person_date", "Field Date"),
+                    selectInput("person_uploader", "uploader", c("No" , "Yes")),
+                    #dateRangeInput("person_date", "Field Date"),
                     actionButton("add_person", "Add Field")
                 ),
                 conditionalPanel(
@@ -287,7 +289,8 @@ server <- function(input, output, session) {
     # Downloadable csv of selected dataset ----
     output$downloadData <- downloadHandler(
         filename = function() {
-            paste(input$proj_lab, ".yml", sep = "")
+            #below =names file as 'project_lab_yyyymmdd_hhmmss.yml using local computer time, could change to UTC
+            paste(input$proj_lab,"_",format(Sys.time(), "%Y%m%d_%H%M%S"), ".yml", sep = "")
         },
         content = function(file) {
             tmp_file <- tempfile()
@@ -329,7 +332,8 @@ server <- function(input, output, session) {
                    inst = input$person_institution, 
                    email = input$person_email,
                    role = input$person_role,
-                   date = input$person_date)
+                   uploader = input$person_uploader)
+                   #date = input$person_date)
         
         output$yaml <- renderText(str_replace_all(string = as.yaml(print_yaml(),
                                                                    indent = 6),
