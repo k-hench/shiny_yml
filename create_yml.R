@@ -15,6 +15,52 @@ library(rworldmap)
 data(countryExData)
 countries_list <- countryExData[, 2]
 
+project_name_list<- sort(
+                   c("food-for-thought",
+                     "baboon",
+                     "bat_foraging",
+                     "bci_general",
+                     "human_network_coordination",
+                     "blackbuck",
+                     "hyena",
+                     "bonobo",
+                     "kinkajou_cognition",
+                     "lion",
+                     "meerkat",
+                     "capuchin_bci",
+                     "mpala_general",
+                     "capuchin_coiba",
+                     "ngogo_monkey",
+                     "capuchin_lomas",
+                     "orangutan",
+                     "capuchin_santarosa",
+                     "ccas",
+                     "red_colobus",
+                     "cichlid",
+                     "sheep",
+                     "coati",
+                     "sifaka_fossa",
+                     "dolphin_human",
+                     "social_foraging_bci",
+                     "drone",
+                     "tuanan_orangutan",
+                     "wilddog"
+                   )
+                 )
+
+data_type_list <- sort(
+  c("Behavioral (focal follows, scans, etc., annotations)",
+    "Movement (gps collar, telemetry data, accelerometer)",
+    "Vocalizations",
+    "Ecological (i.e. species, plant surveys, soil samples)",
+    "Climatic",
+    "Camera Trap",
+    "Spatial (i.e. GPS)",
+    "Drone Imagery",
+    "DNA Samples",
+    "Tissue Samples")
+)
+
 # define functions --------------
 print_yaml <- function(){yaml_obj[names(yaml_obj) %>% order_names()]}
 
@@ -174,57 +220,24 @@ ui <- fluidPage(
                               data_description = "data_description",
                               dates = "dates",
                               funding_sources = "funding_sources"
+                              #keywords = "keywords"
                             )
                 ),
-                # conditionalPanel(
-                #     condition = "input.next_field == 'project_name'",
-                # textInput("proj_lab", "Project Name", value = "new_project",
-                #           width = NULL, placeholder = NULL),
-                # actionButton("add_proj_name", "Update Project Name")
-                # ),
                 conditionalPanel(
-                  condition = "input.next_field == 'project_name'",
-                  selectizeInput(inputId = "project_name",
-                                 label =  "Project Name (select)",
-                                 options = list(create = TRUE),
-                                 choices = sort(
-                                   c("food-for-thought",
-                                     "baboon",
-                                     "bat_foraging",
-                                     "bci_general",
-                                     "human_network_coordination",
-                                     "blackbuck",
-                                     "hyena",
-                                     "bonobo",
-                                     "kinkajou_cognition",
-                                     "lion",
-                                     "meerkat",
-                                     "capuchin_bci",
-                                     "mpala_general",
-                                     "capuchin_coiba",
-                                     "ngogo_monkey",
-                                     "capuchin_lomas",
-                                     "orangutan",
-                                     "capuchin_santarosa",
-                                     "ccas",
-                                     "red_colobus",
-                                     "cichlid",				
-                                     "sheep",
-                                     "coati",
-                                     "sifaka_fossa",
-                                     "dolphin_human",
-                                     "social_foraging_bci",
-                                     "drone",
-                                     "tuanan_orangutan",
-                                     "wilddog"
-                                   )
-                                 )
-
-                                 )
-
-                  ),
-                  actionButton("add_type", "Add Field")
+                    condition = "input.next_field == 'project_name'",
+                textInput("proj_lab", "Project Name", value = "new_project",
+                          width = NULL, placeholder = NULL),
+                actionButton("add_proj_name", "Update Project Name")
                 ),
+                # conditionalPanel(
+                #   condition = "input.next_field == 'project_name'",
+                #   selectizeInput(inputId = "project_name",
+                #                  label =  "Project Name (select)",
+                #                  options = list(create = TRUE),
+                #                  choices = project_name_list
+                #   ),
+                #   actionButton("add_type", "Add Field")
+                # ),
                 conditionalPanel(
                     condition = "input.next_field == 'person'",
                     textInput("person_name", "Person Name", value = "", width = NULL, placeholder = NULL),
@@ -267,18 +280,7 @@ ui <- fluidPage(
                     selectizeInput(inputId = "data_type", 
                                    label =  "Data Type (select or free text)",
                                    options = list(create = TRUE),
-                                   choices = sort(
-                                             c("Behavioral (focal follows, scans, etc., annotations)",
-                                                "Movement (gps collar, telemetry data, accelerometer)",
-                                                "Vocalizations",
-                                                "Ecological (i.e. species, plant surveys, soil samples)",
-                                                "Climatic",
-                                                "Camera Trap",
-                                                "Spatial (i.e. GPS)",
-                                                "Drone Imagery",
-                                                "DNA Samples",
-                                                "Tissue Samples")
-                                     )
+                                   choices = data_type_list
                                       
                                    ),
                     actionButton("add_type", "Add Field")
@@ -324,6 +326,8 @@ ui <- fluidPage(
         )
         
     )
+    
+)
 
 # define server logic (actually calling the yaml update functions) ------------
 server <- function(input, output, session) {
