@@ -11,7 +11,6 @@ library(shiny)
 library(tidyverse)
 library(yaml)
 
-
 # define functions --------------
 print_yaml <- function(){yaml_obj[names(yaml_obj) %>% order_names()]}
 
@@ -32,7 +31,7 @@ order_names <- function(nm){nm %>%
         str_replace_all(pattern = "person_", "02_person_") %>%
         str_replace_all(pattern = "species_", "03_species_") %>%
         str_replace_all(pattern = "location_", "04_location_") %>%
-        str_replace_all(pattern = "data_file_type_overview", "05_data_file_type_overview") %>%
+        str_replace_all(pattern = "data_type_overview", "05_data_type_overview") %>%
         str_replace_all(pattern = "data_description", "06_data_description") %>%
         str_replace_all(pattern = "dates", "07_dates") %>%
         str_replace_all(pattern = "funding_sources", "08_funding_sources") %>% 
@@ -73,15 +72,15 @@ new_location <- function(country, region, park, field_station, lat_log){
 }
 
 new_data_type <- function(data_type){
-    if( sum(str_count(names(yaml_obj),"data_file_type_overview")) == 0 ){ 
-        yaml_obj$data_file_type_overview <- list()
+    if( sum(str_count(names(yaml_obj),"data_type_overview")) == 0 ){ 
+        yaml_obj$data_type_overview <- list()
     }
     
-    new_id <- str_c("file_type_",sum(str_count(names(yaml_obj$data_file_type_overview),"file_type_")) + 1)
+    new_id <- str_c("data_type_",sum(str_count(names(yaml_obj$data_type_overview),"data_type_")) + 1)
     
-    yaml_obj$data_file_type_overview <- c(yaml_obj$data_file_type_overview, new_id = data_type)
+    yaml_obj$data_type_overview <- c(yaml_obj$data_type_overview, new_id = data_type)
     
-    names(yaml_obj$data_file_type_overview)[names(yaml_obj$data_file_type_overview) == "new_id"] <- new_id
+    names(yaml_obj$data_type_overview)[names(yaml_obj$data_type_overview) == "new_id"] <- new_id
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
@@ -165,7 +164,7 @@ ui <- fluidPage(
                             c(proj_name = "project_name",
                               person = "person", location = "location", 
                               species = "species",
-                              file_types = "data_file_type_overview",
+                              data_types = "data_type_overview",
                               data_description = "data_description",
                               dates = "dates",
                               funding_sources = "funding_sources"
@@ -201,13 +200,13 @@ ui <- fluidPage(
                     textInput("loc_park", "Park/Protected Area", value = "", width = NULL, placeholder = NULL),
                     textInput("loc_field_station", "Field Station", value = "", width = NULL, placeholder = NULL),
                     numericInput("loc_long",
-                                 "Long",
+                                 "Longitude in Decimal Degrees (e.g. 9.167)",
                                  0,
                                  min = -180,
                                  max = 180,
                                  step = .001),
                     numericInput("loc_lat",
-                                 "Lat",
+                                 "Latitude in Decimal Degrees (e.g. 47.679) ",
                                  0,
                                  min = -90,
                                  max = 90,
@@ -215,34 +214,43 @@ ui <- fluidPage(
                     actionButton("add_location", "Add Field")
                 ),
                 conditionalPanel(
-                    condition = "input.next_field == 'data_file_type_overview'",
+                    condition = "input.next_field == 'data_type_overview'",
                     selectizeInput(inputId = "data_type", 
                                    label =  "Data Type (select or free text)",
                                    options = list(create = TRUE),
-                                   choices = c("csv", "gpgk", "gpx", "json", 
-                                               "md", "mp3", "mp4", "pdf", "py",
-                                               "R", "Rmd", "shp", "tex", "tiff",
-                                               "tsv", "txt", "yaml/yml","jpg","paper")
+                                   choices = sort(
+                                             c("Behavioral (focal follows, scans, etc., annotations)",
+                                                "Movement (gps collar, telemetry data, accelerometer)",
+                                                "Vocalizations",
+                                                "Ecological (i.e. species, plant surveys, soil samples)",
+                                                "Climatic",
+                                                "Camera Trap",
+                                                "Spatial (i.e. GPS)",
+                                                "Drone Imagery",
+                                                "DNA Samples",
+                                                "Tissue Samples")
+                                     )
+                                      
                                    ),
                     actionButton("add_type", "Add Field")
                 ),
                 conditionalPanel(
                     condition = "input.next_field == 'data_description'",
-                    # textInput("data_desc", "Data description", value = "", width = NULL, placeholder = NULL),
-                    selectizeInput(inputId = "data_desc", 
-                                   label =  "Data description (select or free text)",
-                                   options = list(create = TRUE),
-                                   choices = c("Behavioral (focal follows, scans, etc., annotations)",
-                                               "Movement (gps collar, telemetry data, accelerometer)",
-                                               "Vocalizations",
-                                               "Ecological (i.e. species, plant surveys, soil samples)",
-                                               "Climatic",
-                                               "Camera Trap",
-                                               "Spatial (i.e. GPS)",
-                                               "Drone Imagery",
-                                               "DNA Samples",
-                                               "Tissue Samples")
-                    ),
+                    textInput("data_desc", "Data description", value = "", width = NULL, placeholder = NULL),
+                    # selectizeInput(inputId = "data_desc", 
+                    #                label =  "Data description (select or free text)",
+                    #                options = list(create = TRUE),
+                    #                choices = c("Behavioral (focal follows, scans, etc., annotations)",
+                    #                            "Movement (gps collar, telemetry data, accelerometer)",
+                    #                            "Vocalizations",
+                    #                            "Ecological (i.e. species, plant surveys, soil samples)",
+                    #                            "Climatic",
+                    #                            "Camera Trap",
+                    #                            "Spatial (i.e. GPS)",
+                    #                            "Drone Imagery",
+                    #                            "DNA Samples",
+                    #                            "Tissue Samples")
+                    # ),
                     actionButton("add_desc", "Add Field")
                 ),
                 conditionalPanel(
@@ -251,9 +259,8 @@ ui <- fluidPage(
                     selectizeInput(inputId = "date_id", 
                                    label =  "Date Specifier (select or free text)",
                                    options = list(create = TRUE),
-                                   choices = c("Field Trip",
-                                               "Data Collection",
-                                               "Project Duration")
+                                   choices = c("Data Collection"
+                                               )
                     ),
                     # dateInput(inputId = "date_date", label = "Date"),
                     dateRangeInput(inputId = "date_date", label = "Date"),

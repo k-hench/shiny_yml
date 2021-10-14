@@ -1,0 +1,61 @@
+# Project Metadata: Coiba_Capuchins_2021_07
+project_name: Coiba_Capuchins_2021_07
+person_01:
+  name: Brendan Barrett
+  institute: MPI-AB
+  email: bbarrett@ab.mpg.de
+  role: PI
+  uploader: Yes
+  date: 2021-07-14 - 2021-07-27
+person_02:
+  name: Zoë Goldsborough
+  institute: MPI-AB
+  email: zgoldsborough@ab.mpg.de
+  role: PhD Student
+  date: 2021-07-14 - 2021-07-27
+person_03:
+  name: Claudio Monteza
+  institute: MPI-AB
+  email: cmonteza@ab.mpg.de
+  role: PhD Student
+  date: 2021-07-14 - 2021-07-22
+person_04:
+  name: Meredith Carlson
+  institute: UC Davis
+  email: mkcarlson@ucdavis.edu
+  role: PhD Student
+  date: 2021-07-14 - 2021-07-26
+person_05:
+  name: Evelyn del Rosario
+  institute: UC Davis
+  email: delrosarioev@gmail.com
+  role: Field Assistant
+  date: 2021-07-14 - 2021-07-26
+species_1:
+  name_eng: white-faced capuchin monkey
+  name_loc: mono cariblanco
+  name_sci: Cebus imitator
+location_1:
+  country: Panama
+  region: Veraguas
+  park: Coiba National Park
+  field_station: Rancheria
+  lat_log: 7.4264649608 N; -81.7595969616 E
+data_file_type_overview:
+  file_type_1: csv
+  file_type_2: gpx
+  file_type_3: jpg
+  file_type_4: mp4
+  file_type_5: XLSform
+data_description:
+  data_desc_1: Ecological (i.e. species, plant surveys, soil samples)
+  data_desc_2: Camera Trap
+  data_desc_3: Spatial (i.e. GPS)
+  data_desc_4: DNA Samples
+dates:
+  Field Trip: 2021-07-17 - 2021-07-25
+  Data Collection: 2021-07-17 - 2021-12-31
+  Project Duration: 2017-03-20 - 2021-12-31
+funding_sources:
+  fund_1: Max Planck Geschellschaft
+  fund_2: Packard Foundation Fellowship (2016-65130)
