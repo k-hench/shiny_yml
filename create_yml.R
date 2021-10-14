@@ -10,6 +10,10 @@
 library(shiny)
 library(tidyverse)
 library(yaml)
+library(rworldmap)
+###load data
+data(countryExData)
+countries_list <- countryExData[, 2]
 
 # define functions --------------
 print_yaml <- function(){yaml_obj[names(yaml_obj) %>% order_names()]}
@@ -58,11 +62,12 @@ new_species <- function(name_eng, name_loc, name_sci){
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
-new_location <- function(country, region, park, field_station, lat_log){
+new_location <- function(country, region, city , park, field_station, lat_log){
     new_id <- str_c("location_", sum(str_count(names(yaml_obj),"location_")) + 1)
     
     list_loc <- list(country = country,
                      region = region,
+                     city = city,
                      park = park,
                      field_station = field_station,
                      lat_log = lat_log)
@@ -162,7 +167,8 @@ ui <- fluidPage(
                 condition = "input.new_project == 'modify'",
                 selectInput("next_field", "Next Field",
                             c(proj_name = "project_name",
-                              person = "person", location = "location", 
+                              person = "person", 
+                              location = "location", 
                               species = "species",
                               data_types = "data_type_overview",
                               data_description = "data_description",
@@ -170,20 +176,62 @@ ui <- fluidPage(
                               funding_sources = "funding_sources"
                             )
                 ),
+                # conditionalPanel(
+                #     condition = "input.next_field == 'project_name'",
+                # textInput("proj_lab", "Project Name", value = "new_project",
+                #           width = NULL, placeholder = NULL),
+                # actionButton("add_proj_name", "Update Project Name")
+                # ),
                 conditionalPanel(
-                    condition = "input.next_field == 'project_name'",
-                textInput("proj_lab", "Project Name", value = "new_project", 
-                          width = NULL, placeholder = NULL),
-                actionButton("add_proj_name", "Update Project Name")
+                  condition = "input.next_field == 'project_name'",
+                  selectizeInput(inputId = "project_name",
+                                 label =  "Project Name (select)",
+                                 options = list(create = TRUE),
+                                 choices = sort(
+                                   c("food-for-thought",
+                                     "baboon",
+                                     "bat_foraging",
+                                     "bci_general",
+                                     "human_network_coordination",
+                                     "blackbuck",
+                                     "hyena",
+                                     "bonobo",
+                                     "kinkajou_cognition",
+                                     "lion",
+                                     "meerkat",
+                                     "capuchin_bci",
+                                     "mpala_general",
+                                     "capuchin_coiba",
+                                     "ngogo_monkey",
+                                     "capuchin_lomas",
+                                     "orangutan",
+                                     "capuchin_santarosa",
+                                     "ccas",
+                                     "red_colobus",
+                                     "cichlid",				
+                                     "sheep",
+                                     "coati",
+                                     "sifaka_fossa",
+                                     "dolphin_human",
+                                     "social_foraging_bci",
+                                     "drone",
+                                     "tuanan_orangutan",
+                                     "wilddog"
+                                   )
+                                 )
+
+                                 )
+
+                  ),
+                  actionButton("add_type", "Add Field")
                 ),
                 conditionalPanel(
                     condition = "input.next_field == 'person'",
                     textInput("person_name", "Person Name", value = "", width = NULL, placeholder = NULL),
                     textInput("person_institution", "Institution", value = "", width = NULL, placeholder = NULL),
                     textInput("person_email", "Email", value = "", width = NULL, placeholder = NULL),
-                    selectInput("person_role", "Role", c("PI", "PhD Student", "Masters Student", "Collaborator", "HIWI", "Field Assistant", "Lab Assistant", "Analyst")),
+                    selectInput("person_role", "Role", sort(c("PI", "PhD Student", "Masters Student", "Collaborator", "HIWI", "Field Assistant", "Lab Assistant", "Analyst"))),
                     selectInput("person_uploader", "uploader", c("No" , "Yes")),
-                    #dateRangeInput("person_date", "Field Date"),
                     actionButton("add_person", "Add Field")
                 ),
                 conditionalPanel(
@@ -195,8 +243,9 @@ ui <- fluidPage(
                 ),
                 conditionalPanel(
                     condition = "input.next_field == 'location'",
-                    textInput("loc_country", "Country", value = "", width = NULL, placeholder = NULL),
+                    selectInput("loc_country", "Country", countries_list),
                     textInput("loc_region", "State/Province/Region", value = "", width = NULL, placeholder = NULL),
+                    textInput("loc_city", "City or Town", value = "", width = NULL, placeholder = NULL),
                     textInput("loc_park", "Park/Protected Area", value = "", width = NULL, placeholder = NULL),
                     textInput("loc_field_station", "Field Station", value = "", width = NULL, placeholder = NULL),
                     numericInput("loc_long",
@@ -237,20 +286,6 @@ ui <- fluidPage(
                 conditionalPanel(
                     condition = "input.next_field == 'data_description'",
                     textInput("data_desc", "Data description", value = "", width = NULL, placeholder = NULL),
-                    # selectizeInput(inputId = "data_desc", 
-                    #                label =  "Data description (select or free text)",
-                    #                options = list(create = TRUE),
-                    #                choices = c("Behavioral (focal follows, scans, etc., annotations)",
-                    #                            "Movement (gps collar, telemetry data, accelerometer)",
-                    #                            "Vocalizations",
-                    #                            "Ecological (i.e. species, plant surveys, soil samples)",
-                    #                            "Climatic",
-                    #                            "Camera Trap",
-                    #                            "Spatial (i.e. GPS)",
-                    #                            "Drone Imagery",
-                    #                            "DNA Samples",
-                    #                            "Tissue Samples")
-                    # ),
                     actionButton("add_desc", "Add Field")
                 ),
                 conditionalPanel(
@@ -288,7 +323,7 @@ ui <- fluidPage(
             tags$code(htmlOutput("yaml"))
         )
         
-    ))
+    )
 
 # define server logic (actually calling the yaml update functions) ------------
 server <- function(input, output, session) {
@@ -361,7 +396,8 @@ server <- function(input, output, session) {
 
     observeEvent(input$add_location, {
         new_location(country = input$loc_country,
-                     region = input$loc_region, 
+                     region = input$loc_region,
+                     city = input$loc_city, 
                      park = input$loc_park,
                      field_station = input$loc_field_station,
                      lat_log = str_c(input$loc_lat, " N; ", input$loc_long," E")#input$loc_lat_log
