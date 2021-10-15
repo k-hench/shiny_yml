@@ -11,9 +11,9 @@ library(shiny)
 library(tidyverse)
 library(yaml)
 library(rworldmap)
-###load data
+###load data for limited dropdown menus
 data(countryExData)
-countries_list <- countryExData[, 2]
+countries_list <- sort(countryExData[, 2])
 
 project_name_list<- sort(
                    c("food-for-thought",
@@ -49,13 +49,13 @@ project_name_list<- sort(
                  )
 
 data_type_list <- sort(
-  c("Behavioral (focal follows, scans, etc., annotations)",
-    "Movement (gps collar, telemetry data, accelerometer)",
+  c("Behavioral",
+    "Movement",
     "Vocalizations",
-    "Ecological (i.e. species, plant surveys, soil samples)",
+    "Ecological",
     "Climatic",
     "Camera Trap",
-    "Spatial (i.e. GPS)",
+    "Spatial",
     "Drone Imagery",
     "DNA Samples",
     "Tissue Samples")
@@ -64,7 +64,7 @@ data_type_list <- sort(
 # define functions --------------
 print_yaml <- function(){yaml_obj[names(yaml_obj) %>% order_names()]}
 
-update_name <- function(name){yaml_obj$`project_name` <<- name; yaml_obj[names(yaml_obj) %>% order_names()]}
+update_name <- function(name){yaml_obj$`datachunk_name` <<- name; yaml_obj[names(yaml_obj) %>% order_names()]}
 
 export_yml <- function(name){ 
     if(is.null(yaml_obj$modified_at)){
@@ -77,14 +77,16 @@ export_yml <- function(name){
     }
 
 order_names <- function(nm){nm %>%
-        str_replace_all(pattern = "project_name", "01_project_name") %>%
+        str_replace_all(pattern = "datachunk_name", "01_datachunk_name") %>%
         str_replace_all(pattern = "person_", "02_person_") %>%
         str_replace_all(pattern = "species_", "03_species_") %>%
         str_replace_all(pattern = "location_", "04_location_") %>%
         str_replace_all(pattern = "data_type_overview", "05_data_type_overview") %>%
         str_replace_all(pattern = "data_description", "06_data_description") %>%
         str_replace_all(pattern = "dates", "07_dates") %>%
-        str_replace_all(pattern = "funding_sources", "08_funding_sources") %>% 
+        str_replace_all(pattern = "funding_sources", "08_funding_sources") %>%
+        str_replace_all(pattern = "keywords", "09_keywords") %>% 
+    
         order()
     }
 
@@ -173,6 +175,19 @@ new_date <- function(date_id, date_date){
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
 
+new_keyword <- function(keyword_id){
+  if( sum(str_count(names(yaml_obj),"keyword")) == 0 ){ 
+    yaml_obj$keywords <- list()
+  }
+  
+  new_id <- str_c("keyword_",sum(str_count(names(yaml_obj$keywords),"keyword_")) + 1)
+  
+  yaml_obj$keywords <- c(yaml_obj$keywords, new_id = keyword_id)
+  
+  names(yaml_obj$keywords)[names(yaml_obj$keywords) == "new_id"] <- new_id
+  yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
+}
+
 add_custom_field <- function(custom_name, custom_content){
     cat(str_c(custom_name, ": ", custom_content, "\\n"))
     
@@ -189,8 +204,8 @@ add_custom_field <- function(custom_name, custom_content){
 
 
 # define objects --------------
-yaml_obj <- list( project_name = "")
-proj_name <- ''
+yaml_obj <- list( datachunk_name = "")
+datachunk_name <- ''
 
 # define UI for application (the user input panel) ------------
 ui <- fluidPage(
@@ -201,33 +216,33 @@ ui <- fluidPage(
     sidebarLayout(
         # Sidebar panel for inputs ----
         sidebarPanel(
-            selectInput("new_project", "Project",
+            selectInput("new_datachunk", "datachunk",
                         c(load = "load",
                           modify = "modify",
                           add_custom_entry = "add_custom_entry"
                         )),
             conditionalPanel(
-                condition = "input.new_project == 'load'",
+                condition = "input.new_datachunk == 'load'",
                 fileInput("load_file", "Open Yaml", multiple = FALSE, width = NULL)),
             conditionalPanel(
-                condition = "input.new_project == 'modify'",
+                condition = "input.new_datachunk == 'modify'",
                 selectInput("next_field", "Next Field",
-                            c(proj_name = "project_name",
+                            c(datachunk_name = "datachunk_name",
                               person = "person", 
                               location = "location", 
                               species = "species",
                               data_types = "data_type_overview",
                               data_description = "data_description",
                               dates = "dates",
-                              funding_sources = "funding_sources"
-                              #keywords = "keywords"
+                              funding_sources = "funding_sources",
+                              keywords = "keywords"
                             )
                 ),
                 conditionalPanel(
-                    condition = "input.next_field == 'project_name'",
-                textInput("proj_lab", "Project Name", value = "new_project",
+                    condition = "input.next_field == 'datachunk_name'",
+                textInput("datachunk_lab", "datachunk Name", value = "new_datachunk",
                           width = NULL, placeholder = NULL),
-                actionButton("add_proj_name", "Update Project Name")
+                actionButton("add_datachunk_name", "Update datachunk Name")
                 ),
                 # conditionalPanel(
                 #   condition = "input.next_field == 'project_name'",
@@ -308,12 +323,17 @@ ui <- fluidPage(
                     textInput("fund_src", "Funding Source", value = "", width = NULL, placeholder = NULL),
                     actionButton("add_fund", "Add Field")
                 ),
+                conditionalPanel(
+                  condition = "input.next_field == 'keywords'",
+                  textInput("keyword", "Keywords", value = "", width = NULL, placeholder = NULL),
+                  actionButton("add_keyword", "Add Field")
+                ),
                # Button
                 downloadButton("downloadData", "Download")
-                
+  
             ),
             conditionalPanel(
-                condition = "input.new_project == 'add_custom_entry'",
+                condition = "input.new_datachunk == 'add_custom_entry'",
                 textInput("custom_name", "Field name", value = "", width = NULL, placeholder = NULL),
                 textInput("custom_content", "Custom Content", value = "", width = NULL, placeholder = NULL),
                 actionButton("add_custom", "Add Field"))
@@ -335,19 +355,19 @@ server <- function(input, output, session) {
     # Downloadable csv of selected dataset ----
     output$downloadData <- downloadHandler(
         filename = function() {
-            #below =names file as 'project_lab_yyyymmdd_hhmmss.yml using local computer time, could change to UTC
-            paste(input$proj_lab,"_",format(Sys.time(), "%Y%m%d_%H%M%S"), ".yml", sep = "")
+            #below =names file as 'datachunk_lab_yyyymmdd_hhmmss.yml using local computer time, could change to UTC
+            paste(input$datachunk_lab,"_",format(Sys.time(), "%Y%m%d_%H%M%S"), ".yml", sep = "")
         },
         content = function(file) {
             tmp_file <- tempfile()
-            write_lines(x = str_c("# Project Metadata: ", input$proj_lab), file = file)
-            write_yaml(x = export_yml(input$proj_lab), file = tmp_file)
+            write_lines(x = str_c("# Project Metadata: ", input$datachunk_lab), file = file)
+            write_yaml(x = export_yml(input$datachunk_lab), file = tmp_file)
             write_lines(read_lines(tmp_file), file = file, append = TRUE)
             unlink(tmp_file)
         }
     )
     
-    output$title <- renderText(paste0("Project Title: ", proj_name))
+    output$title <- renderText(paste0("Datachunk Title: ", datachunk_name))
     
     observeEvent(input$load_file, {
         file <- input$load_file
@@ -357,7 +377,7 @@ server <- function(input, output, session) {
         validate(need(ext %in% c("yml", "yaml"), "Please load a yml file"))
         
         yaml_obj <<- read_yaml(file$datapath)
-        proj_name <<- yaml_obj$project_name
+        datachunk_name <<- yaml_obj$datachunk_name
         
         output$yaml <- renderText(str_replace_all(string = as.yaml(print_yaml(),
                                                                    indent = 6),
@@ -366,8 +386,8 @@ server <- function(input, output, session) {
         
     })
     
-    observeEvent(input$add_proj_name, {
-        output$yaml <- renderText(str_replace_all(string = as.yaml(update_name(input$proj_lab),
+    observeEvent(input$add_datachunk_name, {
+        output$yaml <- renderText(str_replace_all(string = as.yaml(update_name(input$datachunk_lab),
                                                                    indent = 6),
                                                   pattern = "\\n", replacement = "<br>") %>% 
                                       str_replace_all(" ", "&nbsp"))
@@ -447,6 +467,15 @@ server <- function(input, output, session) {
                                                                    indent = 6),
                                                   pattern = "\\n", replacement = "<br>") %>% 
                                       str_replace_all(" ", "&nbsp"))
+    })
+    
+    observeEvent(input$add_keyword, {
+      new_keyword(keyword_id = input$keyword)
+      
+      output$yaml <- renderText(str_replace_all(string = as.yaml(print_yaml(),
+                                                                 indent = 6),
+                                                pattern = "\\n", replacement = "<br>") %>% 
+                                  str_replace_all(" ", "&nbsp"))
     })
     
     observeEvent(yaml_obj,{
