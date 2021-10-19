@@ -189,7 +189,6 @@ new_date <- function(date_id, date_date){
     
     # yaml_obj$dates <- c(yaml_obj$dates, new_id = date_date)
     yaml_obj$dates <- c(yaml_obj$dates, new_id = str_c(date_date, collapse = " - "))
-    
     names(yaml_obj$dates)[names(yaml_obj$dates) == "new_id"] <- date_id
     yaml_obj <<- yaml_obj[names(yaml_obj) %>% order_names()]
 }
@@ -386,7 +385,7 @@ server <- function(input, output, session) {
         },
         content = function(file) {
             tmp_file <- tempfile()
-            write_lines(x = str_c("# Project Metadata: ", input$data_catalog_entry_lab), file = file)
+            write_lines(x = str_c("# Data Catalog Entry: ", input$data_catalog_entry_lab), file = file)
             write_yaml(x = export_yml(input$data_catalog_entry_lab), file = tmp_file)
             write_lines(read_lines(tmp_file), file = file, append = TRUE)
             unlink(tmp_file)
